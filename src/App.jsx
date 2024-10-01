@@ -1,11 +1,17 @@
 import { useState } from 'react';
+import './App.css';  // Import the CSS file
 
 export default function App() {
   const [notes, setNotes] = useState('');
-  const [savedNotes, setSavedNotes] = useState([]);
+  const [error, setError] = useState(null); // State to track error
 
   // Function to download notes as a .txt file
   const downloadNotes = () => {
+    if (notes.trim() === '') {
+      setError('Cannot save an empty file. Please write something.');
+      return;
+    }
+
     const blob = new Blob([notes], { type: 'text/plain' });
     const anchor = document.createElement('a');
     anchor.download = `youtube_notes_${Date.now()}.txt`;
@@ -13,34 +19,38 @@ export default function App() {
     anchor.click();
     window.URL.revokeObjectURL(anchor.href);
     setNotes('');
+    setError(null); // Clear error on successful save
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-900">
-      <h1 className="text-3xl font-bold mb-4 text-center">YouTube Notes</h1>
-      <div className="mb-4">
+    <div className="app-container">
+      <h1 className="app-title">YouTube Notes</h1>
+      <div className="notes-container">
         <textarea
-          className="w-full p-4 border rounded-lg shadow-lg text-gray-800"
+          className="notes-textarea"
           placeholder="Write important points..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          rows="10"
+          rows="8"
         />
+        {error && (
+          <p className="error-message">{error}</p> // Show error message if there's an error
+        )}
+        <div className="buttons-container">
+          <button
+            className="notes-button save-button"
+            onClick={downloadNotes}
+          >
+            Save as .txt
+          </button>
+          <button
+            className="notes-button clear-button"
+            onClick={() => setNotes('')}
+          >
+            Clear Notes
+          </button>
+        </div>
       </div>
-      <div className="flex gap-12">
-      <button
-        className="flex-1 p-8 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
-        onClick={downloadNotes}
-      >
-        Save as .txt
-      </button>
-      <button
-        className="flex-1 p-8 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300"
-        onClick={() => setNotes('')}
-      >
-        Clear Notes
-      </button>
-    </div>
     </div>
   );
 }
